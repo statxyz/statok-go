@@ -10,9 +10,8 @@ import (
 
 	"github.com/gammazero/deque"
 	"github.com/golang/snappy"
+	"github.com/statxyz/statok-go/pb"
 	"google.golang.org/protobuf/proto"
-
-	"github.com/godknowsiamgood/gostatok/pb"
 )
 
 var ErrDroppedEvent = errors.New("event dropped, too frequent events or send queue is full")
