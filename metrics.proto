@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package statok;
+
+option go_package = "./pb";
+
+enum MetricType {
+  COUNTER = 0;
+  VALUE = 1;
+}
+
+message Accum {
+  repeated string labels = 1;
+  int64 count = 2;
+  repeated float values = 3;
+}
+
+message Metric {
+  string name = 1;
+  repeated Accum accums = 2;
+  MetricType type = 3;
+}
+
+message Notification {
+  int32 id = 1;
+  string message = 2;
+}
+
+message Metrics {
+  repeated Metric metrics = 1;
+  int32 client_version = 2;
+  repeated Notification notifications = 3;
+}
