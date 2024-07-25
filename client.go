@@ -50,6 +50,7 @@ type eventEntry struct {
 type Client struct {
 	apiKey     string
 	httpClient HTTPClient
+	endpoint   string
 
 	eventsChan chan eventEntry
 	accumsMx   sync.Mutex
@@ -62,6 +63,7 @@ type Client struct {
 type Options struct {
 	APIKey     string
 	HTTPClient HTTPClient
+	Endpoint   string
 }
 
 func NewClient(options Options) *Client {
@@ -74,6 +76,12 @@ func NewClient(options Options) *Client {
 		httpClient: options.HTTPClient,
 		accumsMap:  [2]map[string][]accum{make(map[string][]accum), make(map[string][]accum)},
 		eventsChan: make(chan eventEntry, 2000),
+	}
+
+	if options.Endpoint != "" {
+		c.endpoint = options.Endpoint
+	} else {
+		c.endpoint = "https://statok.dev0101.xyz"
 	}
 
 	go c.startEventsCollector()
@@ -254,7 +262,7 @@ func (c *Client) sendToAPI(data []byte) error {
 	_, _ = writer.Write(data)
 	_ = writer.Close()
 
-	req, err := http.NewRequest("POST", "https://statok.dev0101.xyz/api/i", buf)
+	req, err := http.NewRequest("POST", c.endpoint+"/api/i", buf)
 	if err != nil {
 		return err
 	}
