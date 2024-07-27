@@ -26,10 +26,13 @@ const (
 	metricTypeValue   = 1
 )
 
+type counterType uint32
+type valueType float32
+
 type accum struct {
 	labels  []string
-	counter int
-	values  []float32
+	counter counterType
+	values  []valueType
 }
 
 var accumsPool = sync.Pool{New: func() any {
@@ -37,14 +40,15 @@ var accumsPool = sync.Pool{New: func() any {
 }}
 
 var accumsValuesPool = sync.Pool{New: func() any {
-	return make([]float32, 0, 10)
+	return make([]valueType, 0, 10)
 }}
 
 type eventEntry struct {
 	metricName string
 	metricType int
 	labels     []string
-	value      float64
+	value      valueType
+	counter    counterType
 }
 
 type Client struct {
@@ -91,21 +95,21 @@ func NewClient(options Options) *Client {
 	return c
 }
 
-func (c *Client) Event(metricName string, value int, labels ...string) {
+func (c *Client) Event(metricName string, value counterType, labels ...string) {
 	_ = c.EventWithError(metricName, value, labels...)
 }
 
-func (c *Client) EventWithError(metricName string, value int, labels ...string) error {
-	c.eventsChan <- eventEntry{metricName, metricTypeCounter, labels, float64(value)}
+func (c *Client) EventWithError(metricName string, value counterType, labels ...string) error {
+	c.eventsChan <- eventEntry{metricName, metricTypeCounter, labels, 0, value}
 	return nil
 }
 
-func (c *Client) EventValue(metricName string, value float64, labels ...string) {
+func (c *Client) EventValue(metricName string, value valueType, labels ...string) {
 	_ = c.EventValueWithError(metricName, value, labels...)
 }
 
-func (c *Client) EventValueWithError(metricName string, value float64, labels ...string) error {
-	c.eventsChan <- eventEntry{metricName, metricTypeValue, labels, value}
+func (c *Client) EventValueWithError(metricName string, value valueType, labels ...string) error {
+	c.eventsChan <- eventEntry{metricName, metricTypeValue, labels, value, 0}
 	return nil
 }
 
@@ -147,13 +151,13 @@ func (c *Client) startEventsCollector() {
 			}
 
 			if entry.metricType == metricTypeCounter {
-				acc.counter += int(entry.value)
+				acc.counter += entry.counter
 			} else {
 				if acc.values == nil {
-					acc.values = accumsValuesPool.Get().([]float32)
+					acc.values = accumsValuesPool.Get().([]valueType)
 				}
 				acc.counter += 1
-				acc.values = append(acc.values, round(float32(entry.value), 100))
+				acc.values = append(acc.values, round(entry.value, 100))
 			}
 		}()
 	}
@@ -185,8 +189,8 @@ func (c *Client) startSerializer() {
 					for _, a := range accums {
 						pbAccum := pb.Accum{
 							Labels: a.labels,
-							Count:  int64(a.counter),
-							Values: a.values,
+							Count:  uint32(a.counter),
+							Values: valuesToFloatSlice(a.values),
 						}
 						metric.Accums = append(metric.Accums, &pbAccum)
 					}
@@ -282,6 +286,14 @@ func (c *Client) sendToAPI(data []byte) error {
 	return nil
 }
 
-func round[T float64 | float32, V int](v T, precision V) T {
+func valuesToFloatSlice(values []valueType) []float32 {
+	result := make([]float32, len(values))
+	for i, v := range values {
+		result[i] = float32(v)
+	}
+	return result
+}
+
+func round[T ~float64 | ~float32, V int](v T, precision V) T {
 	return T(math.Round(float64(v)*float64(precision)) / float64(precision))
 }

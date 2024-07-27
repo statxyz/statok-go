@@ -14,29 +14,25 @@ func Init(options Options) {
 	globalClient = NewClient(options)
 }
 
-func Event(metricName string, value int, labels ...string) {
-	if globalClient != nil {
-		globalClient.Event(metricName, value, labels...)
-	}
+func Event[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 | ~uint32](metricName string, value T, labels ...string) {
+	_ = EventWithError(metricName, counterType(max(0, value)), labels...)
 }
 
-func EventWithError(metricName string, value int, labels ...string) error {
+func EventWithError[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 | ~uint32](metricName string, value T, labels ...string) error {
 	if globalClient != nil {
-		return globalClient.EventWithError(metricName, value, labels...)
+		return globalClient.EventWithError(metricName, counterType(max(0, value)), labels...)
 	} else {
 		return nil
 	}
 }
 
-func EventValue(metricName string, value float64, labels ...string) {
-	if globalClient != nil {
-		globalClient.EventValue(metricName, value, labels...)
-	}
+func EventValue[T ~float32 | ~float64](metricName string, value T, labels ...string) {
+	_ = EventValueWithError(metricName, valueType(value), labels...)
 }
 
-func EventValueWithError(metricName string, value float64, labels ...string) error {
+func EventValueWithError[T ~float32 | ~float64](metricName string, value T, labels ...string) error {
 	if globalClient != nil {
-		return globalClient.EventValueWithError(metricName, value, labels...)
+		return globalClient.EventValueWithError(metricName, valueType(value), labels...)
 	} else {
 		return nil
 	}
