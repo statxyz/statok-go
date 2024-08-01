@@ -95,21 +95,21 @@ func NewClient(options Options) *Client {
 	return c
 }
 
-func (c *Client) Event(metricName string, value counterType, labels ...string) {
+func (c *Client) Event(metricName string, value uint32, labels ...string) {
 	_ = c.EventWithError(metricName, value, labels...)
 }
 
-func (c *Client) EventWithError(metricName string, value counterType, labels ...string) error {
-	c.eventsChan <- eventEntry{metricName, metricTypeCounter, labels, 0, value}
+func (c *Client) EventWithError(metricName string, value uint32, labels ...string) error {
+	c.eventsChan <- eventEntry{metricName, metricTypeCounter, labels, 0, counterType(value)}
 	return nil
 }
 
-func (c *Client) EventValue(metricName string, value valueType, labels ...string) {
+func (c *Client) EventValue(metricName string, value float32, labels ...string) {
 	_ = c.EventValueWithError(metricName, value, labels...)
 }
 
-func (c *Client) EventValueWithError(metricName string, value valueType, labels ...string) error {
-	c.eventsChan <- eventEntry{metricName, metricTypeValue, labels, value, 0}
+func (c *Client) EventValueWithError(metricName string, value float32, labels ...string) error {
+	c.eventsChan <- eventEntry{metricName, metricTypeValue, labels, valueType(value), 0}
 	return nil
 }
 
