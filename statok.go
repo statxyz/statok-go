@@ -20,7 +20,7 @@ func Event[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 | ~uint32
 
 func EventWithError[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 | ~uint32](metricName string, value T, labels ...string) error {
 	if globalClient != nil {
-		return globalClient.EventWithError(metricName, counterType(max(0, value)), labels...)
+		return globalClient.EventWithError(metricName, uint32(max(0, value)), labels...)
 	} else {
 		return nil
 	}
@@ -32,7 +32,7 @@ func EventValue[T ~float32 | ~float64](metricName string, value T, labels ...str
 
 func EventValueWithError[T ~float32 | ~float64](metricName string, value T, labels ...string) error {
 	if globalClient != nil {
-		return globalClient.EventValueWithError(metricName, valueType(value), labels...)
+		return globalClient.EventValueWithError(metricName, float32(value), labels...)
 	} else {
 		return nil
 	}
