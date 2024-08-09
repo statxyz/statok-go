@@ -375,7 +375,7 @@ func (c *Client) startSender() {
 }
 
 func (c *Client) sendToAPI(data *bytes.Buffer) error {
-	req, err := http.NewRequest("POST", c.endpoint+"/api/i2", bytes.NewReader(data.Bytes()))
+	req, err := http.NewRequest("POST", c.endpoint+"/i", bytes.NewReader(data.Bytes()))
 	if err != nil {
 		return err
 	}
