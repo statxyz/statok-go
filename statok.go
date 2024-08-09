@@ -15,7 +15,7 @@ func Init(options Options) {
 }
 
 func Event[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 | ~uint32](metricName string, value T, labels ...string) {
-	_ = EventWithError(metricName, counterType(max(0, value)), labels...)
+	_ = EventWithError(metricName, max(0, value), labels...)
 }
 
 func EventWithError[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 | ~uint32](metricName string, value T, labels ...string) error {
@@ -27,7 +27,7 @@ func EventWithError[T ~int | ~int8 | ~int16 | ~int32 | ~uint | ~uint8 | ~uint16 
 }
 
 func EventValue[T ~float32 | ~float64](metricName string, value T, labels ...string) {
-	_ = EventValueWithError(metricName, valueType(value), labels...)
+	_ = EventValueWithError(metricName, value, labels...)
 }
 
 func EventValueWithError[T ~float32 | ~float64](metricName string, value T, labels ...string) error {
