@@ -375,6 +375,10 @@ func (c *Client) startSender() {
 }
 
 func (c *Client) sendToAPI(data *bytes.Buffer) error {
+	if strings.Contains(string(data.Bytes()), "ingest") {
+		log.Println("send to ", c.endpoint+"/i")
+	}
+	log.Println("send to ", c.endpoint+"/i")
 	req, err := http.NewRequest("POST", c.endpoint+"/i", bytes.NewReader(data.Bytes()))
 	if err != nil {
 		return err
